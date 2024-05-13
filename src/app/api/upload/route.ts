@@ -28,11 +28,11 @@ export async function POST(request: NextRequest) {
         );
       }
       const buffer = Buffer.from(await file.arrayBuffer());
-      fs.writeFileSync(`${rootPath}/uploads/data.csv`, buffer);
+      fs.writeFileSync(`${rootPath}/tmp/data.csv`, buffer);
 
     
        const results: CsvData[] = [];
-       fs.createReadStream(`${rootPath}/uploads/data.csv`)
+       fs.createReadStream(`${rootPath}/tmp/data.csv`)
         .pipe(csv())
         .on('data', (data) => results.push(data))
         .on('end',async () => {
