@@ -9,16 +9,25 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/nextjs-registry": "^1.0.0",
+    "@prisma/client": "^5.13.0",
+    "ant-design": "^1.0.0",
+    "antd": "^5.17.0",
+    "csv-parser": "^3.0.0",
+    "next": "14.2.3",
     "react": "^18",
-    "react-dom": "^18",
-    "next": "14.2.3"
+    "react-dom": "^18"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@types/antd": "^1.0.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.2.3"
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-next": "^14.2.3",
+    "globals": "^15.2.0",
+    "prisma": "^5.13.0",
+    "typescript": "^5"
   }
 }
