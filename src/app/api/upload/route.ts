@@ -2,11 +2,26 @@ import csv from 'csv-parser';
 import fs from 'fs'
 import prisma from '../../lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
+import { arrayBuffer } from 'stream/consumers';
+import { Readable } from 'stream';
+import { promises } from 'dns';
+
+interface CsvData {
+  code: string;
+  description: string;
+  quantity: string;
+  price: string;
+  total_price: string;
+}
+
+type FormDataEntryValueArrayBuffer  = {
+  arrayBuffer: () => Promise<ArrayBuffer>;
+}  
 
 export async function POST(request: NextRequest) {
     try {
       const formData  = await request.formData()
-      const file = formData.get("file") 
+      const file = formData.get("file") as FormDataEntryValueArrayBuffer & globalThis.FormDataEntryValue | null ;
 
       if (!file) {
         return NextResponse.json(
@@ -18,7 +33,7 @@ export async function POST(request: NextRequest) {
       fs.writeFileSync(`uploads/data.csv`, buffer);
 
     
-       const results = []
+       const results: CsvData[] = [];
        fs.createReadStream('uploads/data.csv')
         .pipe(csv())
         .on('data', (data) => results.push(data))
