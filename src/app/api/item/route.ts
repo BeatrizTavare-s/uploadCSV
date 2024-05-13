@@ -4,6 +4,7 @@ import toObject from '../../utils/toObject'
 import { NextRequest } from 'next/server';
 
 
+
 async function getItemById(id:string){
     const item = await prisma.item.findUnique({
         where:{
@@ -16,6 +17,8 @@ async function getItemById(id:string){
             quantity: true,
             price: true,
             total_price: true,
+            created_at: true,
+            updated_at: true
         }
     });
 
@@ -24,10 +27,11 @@ async function getItemById(id:string){
 
 export async function GET(request: NextRequest){
     const id =  request.nextUrl.searchParams.get('id');
-    let itemById = []
     if(id) {
-        itemById = await getItemById(id as string)
-        return Response.json(toObject(itemById))
+       const itemById = await getItemById(id as string)
+        if(itemById){
+            return Response.json(toObject(itemById))
+        }
     }
 
     
@@ -39,6 +43,8 @@ export async function GET(request: NextRequest){
           quantity: true,
           price: true,
           total_price: true,
+          created_at: true,
+          updated_at: true
         }
     });
     
