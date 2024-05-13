@@ -39,8 +39,7 @@ export async function POST(request: NextRequest) {
         .on('data', (data) => results.push(data))
         .on('end',async () => {
             for (const result of results) {
-                console.log(result);
-           await prisma.item.create({
+            await prisma.item.create({
                 data: {
                   code: result.code,
                   description: result.description,

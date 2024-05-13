@@ -20,7 +20,6 @@ export const ModalEdit = ({selectedItem, onCloseModal, visible, onSaveEdit}:Moda
     };
 
     const handleSavEdit = () => {
-        console.log("valor editado selected",itemEdit)
         onSaveEdit(itemEdit)
         onCloseModal()
     };
