@@ -27,6 +27,7 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
   const [listItems, setListItems] = useState<Item[]>(items);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [lodding, setLodding] = useState(false);
 
   const itemService = new ItemService();
 
@@ -39,6 +40,7 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
     if (editedItem) {
       const itemEdited = await itemService.edit(editedItem?.id, editedItem);
       setListItems(listItems.map((item) => (itemEdited.id === item.id ? itemEdited : item)));
+      openNotificationEditSave('success')
     }
   };
 
@@ -56,8 +58,13 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
       api[type]({
         duration: 1,
         message: 'Item deletado com sucesso',
-        description:
-          'Item deletado com sucesso!',
+      });
+    };
+
+    const openNotificationEditSave = (type: NotificationType) => {
+      api[type]({
+        duration: 1,
+        message: 'Item editado com sucesso',
       });
     };
 
@@ -96,14 +103,23 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
       setModalVisible(false);
     };
 
+
+    const synchronousTimeout = (milliseconds: number) => {
+      return new Promise((resolve) => {
+        setTimeout(resolve, milliseconds);
+      });
+    };
+    
+
     const handleFechItems = async () => {
-      setTimeout(async () => {
-        const itensFech = await itemService.get();
-        setListItems(itensFech);
-      }, 2000);
+      setLodding(true);
+      await synchronousTimeout(2000);
+      const itensFech = await itemService.get();
+      setListItems(itensFech);
+      setLodding(false);
     };
 
-    return (
+return (
       <>
         {contextHolder}
 
@@ -122,6 +138,7 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
         <Table
           columns={columns}
           dataSource={listItems}
+          loading={lodding}
         />
       </>
 
