@@ -1,5 +1,4 @@
 import csv from 'csv-parser';
-import fs from 'fs'
 import prisma from '../../lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { put, list, del  } from "@vercel/blob";
