@@ -78,7 +78,7 @@ export async function POST(request: Request){
         }
     });
     
-    return Response.json(toObject(editedItem))
+    return Response.json({item: toObject(editedItem)})
  }
  
 

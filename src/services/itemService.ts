@@ -13,12 +13,12 @@ export class ItemService {
 
 
   async edit(id:bigint, item: Item) {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/api/item/${id}`, { method: 'PUT', body: JSON.stringify(item) });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/api/item?id=${id}`, { method: 'PUT', body: JSON.stringify(item) });
     const data = await res.json();
     if (!res.ok) {
       throw new Error('Failed to fetch data');
     }
-    return data;
+    return data.item;
   }
 
   async delete(id: bigint) {
