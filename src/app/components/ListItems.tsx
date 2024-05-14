@@ -97,8 +97,10 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
     };
 
     const handleFechItems = async () => {
-      const itensFech = await itemService.get();
-      setListItems(itensFech);
+      setTimeout(async () => {
+        const itensFech = await itemService.get();
+        setListItems(itensFech);
+      }, 2000);
     };
 
     return (

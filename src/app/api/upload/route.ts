@@ -2,7 +2,8 @@ import csv from 'csv-parser';
 import fs from 'fs'
 import prisma from '../../lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
-
+import { put, list, del  } from "@vercel/blob";
+const request = require('request');
 interface CsvData {
   code: string;
   description: string;
@@ -15,10 +16,9 @@ type FormDataEntryValueArrayBuffer  = {
   arrayBuffer: () => Promise<ArrayBuffer>;
 }  
 
-export async function POST(request: NextRequest) {
-    try {
+export async function POST(nextRequest: NextRequest) {
       const rootPath = process.cwd();
-      const formData  = await request.formData()
+      const formData  = await nextRequest.formData()
       const file = formData.get("file") as FormDataEntryValueArrayBuffer & globalThis.FormDataEntryValue | null ;
 
       if (!file) {
@@ -27,35 +27,41 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      const buffer = Buffer.from(await file.arrayBuffer());
-      fs.writeFileSync(`${rootPath}/tmp/data.csv`, buffer);
 
-    
-       const results: CsvData[] = [];
-       fs.createReadStream(`${rootPath}/tmp/data.csv`)
-        .pipe(csv())
-        .on('data', (data) => results.push(data))
-        .on('end',async () => {
-            for (const result of results) {
-            await prisma.item.create({
-                data: {
-                  code: result.code,
-                  description: result.description,
-                  quantity: Number(result.quantity),
-                  price:  Number(result.price),
-                  total_price: Number(result.total_price),
-                  updated_at: new Date(),
-                  created_at: new Date(),
-                }
-              });
-          }
+      await put('uploads/data.csv', file, { access: 'public' });
+
+      const baixar = (url: string) => {
+        return new Promise((resolver) => {
+          const results: CsvData[] = [];
+          request(url).on('response', (resposta: any) => {
+            const stream = resposta.pipe(csv())
+            .on('data', (data: CsvData) => results.push(data))
+            .on('end',async () => {
+                for (const result of results) {
+                await prisma.item.create({
+                    data: {
+                      code: result.code,
+                      description: result.description,
+                      quantity: Number(result.quantity),
+                      price:  Number(result.price),
+                      total_price: Number(result.total_price),
+                      updated_at: new Date(),
+                      created_at: new Date(),
+                    }
+                  });
+              }
+            });
+            stream.on('finish', resolver);
+          });
         });
-    
-      } catch (err) {
-          console.error(err);
-          return;
-      }
+      };
+  
 
+    const response = await list();
+    response.blobs.map((blob) => {
+       baixar(blob.url);
+       del(blob.url);
+    })
 
     return Response.json({success: true});
     
