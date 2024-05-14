@@ -3,7 +3,7 @@ import React, {  useState } from 'react';
 import {
   Table,  Button, TableColumnsType, Popconfirm, notification,
 } from 'antd';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined,LoadingOutlined } from '@ant-design/icons';
 import { ModalEdit } from './ModalEdit';
 import UpdateFile from './UploadFile';
 import { ItemService } from '@/services/itemService';
@@ -113,7 +113,7 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
 
     const handleFechItems = async () => {
       setLodding(true);
-      await synchronousTimeout(2000);
+      await synchronousTimeout(5000);
       const itensFech = await itemService.get();
       setListItems(itensFech);
       setLodding(false);
@@ -134,11 +134,10 @@ return (
        onSaveEdit={handleSavEdit}
      />
      )}
-       
         <Table
           columns={columns}
           dataSource={listItems}
-          loading={lodding}
+          caption={lodding ? <span><LoadingOutlined  />Buscando Itens</span> : ''}
         />
       </>
 
