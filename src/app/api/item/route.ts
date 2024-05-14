@@ -75,6 +75,7 @@ export async function POST(request: Request){
             quantity: item.quantity,
             price: item.price,
             total_price: item.quantity * item.price,
+            updated_at: new Date(),
         }
     });
     
