@@ -113,7 +113,7 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
 
     const handleFechItems = async () => {
       setLodding(true);
-      await synchronousTimeout(10000);
+      await synchronousTimeout(2000);
       const itensFech = await itemService.get();
       setListItems(itensFech);
       setLodding(false);
