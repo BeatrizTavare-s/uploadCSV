@@ -55,10 +55,10 @@ export async function POST(nextRequest: NextRequest) {
   
 
     const response = await list();
-    response.blobs.map(async(blob) => {
+    await Promise.all(response.blobs.map(async (blob) => {
       await downloadFile(blob.url);
       await del(blob.url);
-    })
+    }));
 
     return Response.json({success: true});
     
