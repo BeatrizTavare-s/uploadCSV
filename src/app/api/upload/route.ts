@@ -58,9 +58,9 @@ export async function POST(nextRequest: NextRequest) {
   
 
     const response = await list();
-    response.blobs.map((blob) => {
-       baixar(blob.url);
-       del(blob.url);
+    response.blobs.map(async(blob) => {
+      await baixar(blob.url);
+      await del(blob.url);
     })
 
     return Response.json({success: true});
