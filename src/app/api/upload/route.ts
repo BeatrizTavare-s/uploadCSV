@@ -3,7 +3,7 @@ import fs from 'fs'
 import prisma from '../../lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { put, list, del  } from "@vercel/blob";
-const request = require('request');
+import axios from 'axios';
 interface CsvData {
   code: string;
   description: string;
@@ -12,14 +12,9 @@ interface CsvData {
   total_price: string;
 }
 
-type FormDataEntryValueArrayBuffer  = {
-  arrayBuffer: () => Promise<ArrayBuffer>;
-}  
-
 export async function POST(nextRequest: NextRequest) {
-      const rootPath = process.cwd();
       const formData  = await nextRequest.formData()
-      const file = formData.get("file") as FormDataEntryValueArrayBuffer & globalThis.FormDataEntryValue | null ;
+      const file = formData.get("file");
 
       if (!file) {
         return NextResponse.json(
@@ -30,11 +25,14 @@ export async function POST(nextRequest: NextRequest) {
 
       await put('uploads/data.csv', file, { access: 'public' });
 
-      const baixar = (url: string) => {
+      const downloadFile = (url: string) => {
         return new Promise((resolver) => {
           const results: CsvData[] = [];
-          request(url).on('response', (resposta: any) => {
-            const stream = resposta.pipe(csv())
+          axios({
+            url,
+            responseType: 'stream'
+          }).then((response: any) => {
+            const stream = response.data.pipe(csv())
             .on('data', (data: CsvData) => results.push(data))
             .on('end',async () => {
                 for (const result of results) {
@@ -59,7 +57,7 @@ export async function POST(nextRequest: NextRequest) {
 
     const response = await list();
     response.blobs.map(async(blob) => {
-      await baixar(blob.url);
+      await downloadFile(blob.url);
       await del(blob.url);
     })
 
