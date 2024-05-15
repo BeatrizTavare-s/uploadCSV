@@ -2,11 +2,13 @@
 import React, {  useState } from 'react';
 import {
   Table,  Button, TableColumnsType, Popconfirm, notification,
+  Tag,
 } from 'antd';
 import { QuestionCircleOutlined,LoadingOutlined } from '@ant-design/icons';
 import { ModalEdit } from './ModalEdit';
 import UpdateFile from './UploadFile';
 import { ItemService } from '@/services/itemService';
+import { currencyBRL } from '../utils/currencyBRL';
 
 export interface Item {
     id: bigint;
@@ -15,6 +17,8 @@ export interface Item {
     quantity: number ;
     price: number;
     total_price: number;
+    created_at: Date;
+    updated_at: Date;
   }
 
 
@@ -69,23 +73,50 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
     };
 
     const columns: TableColumnsType<Item> = [
-      { title: 'Código', dataIndex: 'code', key: 'code' },
-      { title: 'Descrição', dataIndex: 'description', key: 'description' },
-      { title: 'Quantidade', dataIndex: 'quantity', key: 'quantity' },
-      { title: 'Preço', dataIndex: 'price', key: 'price' },
-      { title: 'Total', dataIndex: 'total_price', key: 'total_price' },
+      { title: 'Código', dataIndex: 'code', key: 'code', align:"center"},
+      { title: 'Descrição', dataIndex: 'description', key: 'description'},
+      { title: 'Quantidade', dataIndex: 'quantity', key: 'quantity', align:"center"},
+      { title: 'Preço', dataIndex: 'price', key: 'price',       
+      render: (e, record) => (
+        <p> {currencyBRL(Number(record.price))}</p>
+      ), },
+      { title: 'Total', dataIndex: 'total_price', key: 'total_price', 
+      render: (e, record) => (
+        <p> {currencyBRL(Number(record.total_price))}</p>
+      ),
+       },
+      { title: 'Criado em', dataIndex: 'created_at', key: 'created_at', 
+       render: (e, record) => (
+        <div style={{ display: 'block' }}>
+          <Tag>{new Date(record.created_at).toLocaleDateString()}</Tag>
+          <Tag bordered={false}>
+            {new Date(record.created_at).toLocaleTimeString()}
+          </Tag>
+        </div>
+       ),
+        },
+      { title: 'Alterado em', dataIndex: 'updated_at', key: 'updated_at', 
+        render: (e, record) => (
+          <div>
+            <Tag>{new Date(record.updated_at).toLocaleDateString()}</Tag>
+            <Tag bordered={false}>
+              {new Date(record.updated_at).toLocaleTimeString()}
+            </Tag>
+        </div>
+        ),
+         },
       {
         title: 'Edição',
         dataIndex: '',
-        key: 'x',
+        key: 'edit',
         render: (e, record) => (
           <a onClick={() => handleRowClick(record)}>Editar </a>
         ),
       },
       {
-        title: 'Action',
+        title: 'Deletar',
         dataIndex: '',
-        key: 'x',
+        key: 'delete',
         render: (e, record) => (
           <Popconfirm
             title="Deletar Item"
@@ -93,7 +124,7 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
             icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
             onConfirm={() => handleDeleteItem(record.id)}
           >
-            <Button danger>Delete</Button>
+            <Button danger>Deletar</Button>
           </Popconfirm>
         ),
       },
@@ -122,8 +153,8 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
 return (
       <>
         {contextHolder}
-
         <UpdateFile onFechItems={handleFechItems} />
+
 
         {modalVisible && selectedItem
      && (
@@ -134,14 +165,17 @@ return (
        onSaveEdit={handleSavEdit}
      />
      )}
+        <br/>
         <Table
+          rowKey={(record) => record.id}
           columns={columns}
           dataSource={listItems}
-          caption={lodding ? <span><LoadingOutlined  />Buscando Itens</span> : ''}
+          caption={lodding ? <Tag color="processing"><LoadingOutlined/> {"  "}Buscando Itens</Tag> : ''}
         />
       </>
 
     );
 };
+
 
 export default ListItems;
