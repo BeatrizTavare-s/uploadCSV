@@ -24,8 +24,8 @@ const UpdateFile: React.FC<FuncticionFetchItems> = ({onFechItems}) => {
 
   return (
     <Upload {...props}>
-    <Button icon={<UploadOutlined />}>Click to Upload</Button>
-  </Upload>
+      <Button type="primary" icon={<UploadOutlined />}>Enviar Arquivo</Button>
+    </Upload>
   );
 };
 
