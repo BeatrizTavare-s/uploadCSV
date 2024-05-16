@@ -1,6 +1,6 @@
 import csv from 'csv-parser';
 import { NextRequest, NextResponse } from 'next/server';
-import { put, list, del } from '@vercel/blob';
+import { put, list, del, ListBlobResult } from '@vercel/blob';
 import axios from 'axios';
 import { Item } from '@/app/components/ListItems';
 import prisma from '../../lib/prisma';
@@ -30,6 +30,10 @@ function getListItems(results: CsvData[]) {
 }
 
 export async function POST(nextRequest: NextRequest) {
+  let listBlobResult: ListBlobResult = {
+    blobs: [], 
+    hasMore: false, 
+  };
   try {
     const formData = await nextRequest.formData();
     const file = formData.get('file');
@@ -61,20 +65,10 @@ export async function POST(nextRequest: NextRequest) {
       });
     });
 
-    const response = await list();
-    try{
-      await Promise.all(response.blobs.map(async (blob) => {
+    listBlobResult = await list();
+    await Promise.all(listBlobResult.blobs.map(async (blob) => {
         await downloadFile(blob.url);
-      }));
-    }catch(error: any){
-      return Response.json({
-        success: false,
-        error: error.message,
-      }, { status: 500 });
-    }finally{
-      const listBlobToDelete = response.blobs.map((blob) => blob.url)
-      await del(listBlobToDelete);
-    }
+    }));
 
     return Response.json({ success: true }, { status: 200 });
   } catch (error: any) {
@@ -82,5 +76,8 @@ export async function POST(nextRequest: NextRequest) {
       success: false,
       error: error.message,
     }, { status: 500 });
+  }finally{
+    const listBlobToDelete = listBlobResult.blobs.map((blob) => blob.url)
+    await del(listBlobToDelete);
   }
 }
