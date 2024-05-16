@@ -1,11 +1,11 @@
-import { AntdRegistry } from "@ant-design/nextjs-registry";
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { AntdRegistry } from '@ant-design/nextjs-registry';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Upload CSV",
+  title: 'Upload CSV',
 };
 
 export default function RootLayout({

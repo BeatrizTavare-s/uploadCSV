@@ -1,8 +1,9 @@
 import React from 'react';
-import ListItems from './components/ListItems';
 import { ItemService } from '@/services/itemService';
-import { Divider, Flex, Image, Tag } from 'antd';
-import { Col, Row } from 'antd';
+import {
+  Divider, Flex, Tag,
+} from 'antd';
+import ListItems from './components/ListItems';
 
 async function Page() {
   const itemService = new ItemService();
@@ -10,8 +11,11 @@ async function Page() {
 
   return (
     <>
-      <Flex  justify={"space-evenly"} align={"center"}>
-        <h1>Upload Arquivos <Tag color="green" >.CSV</Tag></h1>
+      <Flex justify="space-evenly" align="center">
+        <h1>
+          Upload Arquivos
+          <Tag color="green">.CSV</Tag>
+        </h1>
       </Flex>
       <Divider />
       <ListItems items={items} />

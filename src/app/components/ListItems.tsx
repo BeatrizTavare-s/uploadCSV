@@ -1,13 +1,14 @@
 'use client';
-import React, {  useState } from 'react';
+
+import React, { useState } from 'react';
 import {
-  Table,  Button, TableColumnsType, Popconfirm, notification,
+  Table, Button, TableColumnsType, Popconfirm, notification,
   Tag,
 } from 'antd';
-import { QuestionCircleOutlined,LoadingOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined, LoadingOutlined } from '@ant-design/icons';
+import { ItemService } from '@/services/itemService';
 import { ModalEdit } from './ModalEdit';
 import UpdateFile from './UploadFile';
-import { ItemService } from '@/services/itemService';
 import { currencyBRL } from '../utils/currencyBRL';
 
 export interface Item {
@@ -21,12 +22,10 @@ export interface Item {
     updated_at: Date;
   }
 
-
   interface ListItemsProps {
     items: Item[];
   }
 
-  
 const ListItems: React.FC<ListItemsProps> = ({ items }) => {
   const [listItems, setListItems] = useState<Item[]>(items);
   const [modalVisible, setModalVisible] = useState(false);
@@ -44,7 +43,7 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
     if (editedItem) {
       const itemEdited = await itemService.edit(editedItem?.id, editedItem);
       setListItems(listItems.map((item) => (itemEdited.id === item.id ? itemEdited : item)));
-      openNotificationEditSave('success')
+      openNotificationEditSave('success');
     }
   };
 
@@ -73,38 +72,61 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
     };
 
     const columns: TableColumnsType<Item> = [
-      { title: 'Código', dataIndex: 'code', key: 'code', align:"center"},
-      { title: 'Descrição', dataIndex: 'description', key: 'description'},
-      { title: 'Quantidade', dataIndex: 'quantity', key: 'quantity', align:"center"},
-      { title: 'Preço', dataIndex: 'price', key: 'price',       
-      render: (e, record) => (
-        <p> {currencyBRL(Number(record.price))}</p>
-      ), },
-      { title: 'Total', dataIndex: 'total_price', key: 'total_price', 
-      render: (e, record) => (
-        <p> {currencyBRL(Number(record.total_price))}</p>
-      ),
-       },
-      { title: 'Criado em', dataIndex: 'created_at', key: 'created_at', 
-       render: (e, record) => (
-        <div style={{ display: 'block' }}>
-          <Tag>{new Date(record.created_at).toLocaleDateString()}</Tag>
-          <Tag bordered={false}>
-            {new Date(record.created_at).toLocaleTimeString()}
-          </Tag>
-        </div>
-       ),
-        },
-      { title: 'Alterado em', dataIndex: 'updated_at', key: 'updated_at', 
+      {
+        title: 'Código', dataIndex: 'code', key: 'code', align: 'center',
+      },
+      { title: 'Descrição', dataIndex: 'description', key: 'description' },
+      {
+        title: 'Quantidade', dataIndex: 'quantity', key: 'quantity', align: 'center',
+      },
+      {
+        title: 'Preço',
+        dataIndex: 'price',
+        key: 'price',
+        render: (e, record) => (
+          <p>
+            {' '}
+            {currencyBRL(Number(record.price))}
+          </p>
+        ),
+      },
+      {
+        title: 'Total',
+        dataIndex: 'total_price',
+        key: 'total_price',
+        render: (e, record) => (
+          <p>
+            {' '}
+            {currencyBRL(Number(record.total_price))}
+          </p>
+        ),
+      },
+      {
+        title: 'Criado em',
+        dataIndex: 'created_at',
+        key: 'created_at',
+        render: (e, record) => (
+          <div style={{ display: 'block' }}>
+            <Tag>{new Date(record.created_at).toLocaleDateString()}</Tag>
+            <Tag bordered={false}>
+              {new Date(record.created_at).toLocaleTimeString()}
+            </Tag>
+          </div>
+        ),
+      },
+      {
+        title: 'Alterado em',
+        dataIndex: 'updated_at',
+        key: 'updated_at',
         render: (e, record) => (
           <div>
             <Tag>{new Date(record.updated_at).toLocaleDateString()}</Tag>
             <Tag bordered={false}>
               {new Date(record.updated_at).toLocaleTimeString()}
             </Tag>
-        </div>
+          </div>
         ),
-         },
+      },
       {
         title: 'Edição',
         dataIndex: '',
@@ -120,7 +142,7 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
         render: (e, record) => (
           <Popconfirm
             title="Deletar Item"
-            description="Confirma apagar item?"
+            description="Confirmar a exclusão?"
             icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
             onConfirm={() => handleDeleteItem(record.id)}
           >
@@ -134,13 +156,9 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
       setModalVisible(false);
     };
 
-
-    const synchronousTimeout = (milliseconds: number) => {
-      return new Promise((resolve) => {
-        setTimeout(resolve, milliseconds);
-      });
-    };
-    
+    const synchronousTimeout = (milliseconds: number) => new Promise((resolve) => {
+      setTimeout(resolve, milliseconds);
+    });
 
     const handleFechItems = async () => {
       setLodding(true);
@@ -150,11 +168,10 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
       setLodding(false);
     };
 
-return (
+    return (
       <>
         {contextHolder}
         <UpdateFile onFechItems={handleFechItems} />
-
 
         {modalVisible && selectedItem
      && (
@@ -165,17 +182,23 @@ return (
        onSaveEdit={handleSavEdit}
      />
      )}
-        <br/>
+        <br />
         <Table
           rowKey={(record) => record.id}
           columns={columns}
           dataSource={listItems}
-          caption={lodding ? <Tag color="processing"><LoadingOutlined/> {"  "}Buscando Itens</Tag> : ''}
+          caption={lodding ? (
+            <Tag color="processing">
+              <LoadingOutlined />
+              {' '}
+              {'  '}
+              Buscando Itens
+            </Tag>
+          ) : ''}
         />
       </>
 
     );
 };
-
 
 export default ListItems;

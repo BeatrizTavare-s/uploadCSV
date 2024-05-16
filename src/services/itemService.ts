@@ -1,7 +1,6 @@
-import { Item } from "@/app/components/ListItems";
+import { Item } from '@/app/components/ListItems';
 
 export class ItemService {
-
   async get() {
     const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/api/item`, { cache: 'no-store' });
     const data = await res.json();
@@ -10,7 +9,6 @@ export class ItemService {
     }
     return data.items;
   }
-
 
   async edit(id:bigint, item: Item) {
     const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/api/item?id=${id}`, { method: 'PUT', body: JSON.stringify(item) });
@@ -26,6 +24,5 @@ export class ItemService {
     if (!res.ok) {
       throw new Error('Failed to fetch data');
     }
-    return 
   }
 }
