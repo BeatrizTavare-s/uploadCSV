@@ -64,8 +64,10 @@ export async function POST(nextRequest: NextRequest) {
     const response = await list();
     await Promise.all(response.blobs.map(async (blob) => {
       await downloadFile(blob.url);
-      await del(blob.url);
     }));
+
+    const listBlobToDelete = response.blobs.map((blob) => blob.url)
+    await del(listBlobToDelete);
 
     return Response.json({ success: true }, { status: 200 });
   } catch (error: any) {
