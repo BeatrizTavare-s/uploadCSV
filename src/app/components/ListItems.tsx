@@ -146,6 +146,7 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
             description="Confirmar a exclusão?"
             icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
             onConfirm={() => handleDeleteItem(record.id)}
+            cancelText="Cancelar"
           >
             <Button danger>Deletar</Button>
           </Popconfirm>
