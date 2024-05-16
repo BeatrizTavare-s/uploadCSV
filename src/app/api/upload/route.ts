@@ -58,13 +58,11 @@ export async function POST(nextRequest: NextRequest) {
                 data: listItems,
               });
             }catch (error: any) {
-              console.error(error);
               return Response.json({
                 success: false,
                 error: "Error createMany items",
               }, { status: 500 });
             }finally{
-              console.log("finally");
               await del(url);
             }
           });
