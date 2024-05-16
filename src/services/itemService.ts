@@ -14,7 +14,7 @@ export class ItemService {
     const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/api/item?id=${id}`, { method: 'PUT', body: JSON.stringify(item) });
     const data = await res.json();
     if (!res.ok) {
-      throw new Error('Failed to fetch data');
+      throw new Error('Failed to edit data');
     }
     return data.item;
   }
@@ -22,7 +22,7 @@ export class ItemService {
   async delete(id: bigint) {
     const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/api/item?id=${id}`, { method: 'DELETE' });
     if (!res.ok) {
-      throw new Error('Failed to fetch data');
+      throw new Error('Failed to delete data');
     }
   }
 }
