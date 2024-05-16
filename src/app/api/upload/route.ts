@@ -1,6 +1,6 @@
 import csv from 'csv-parser';
 import { NextRequest, NextResponse } from 'next/server';
-import { put, list, del, ListBlobResult } from '@vercel/blob';
+import { put, list, del } from '@vercel/blob';
 import axios from 'axios';
 import { Item } from '@/app/components/ListItems';
 import prisma from '../../lib/prisma';
@@ -30,10 +30,6 @@ function getListItems(results: CsvData[]) {
 }
 
 export async function POST(nextRequest: NextRequest) {
-  let listBlobResult: ListBlobResult = {
-    blobs: [], 
-    hasMore: false, 
-  };
   try {
     const formData = await nextRequest.formData();
     const file = formData.get('file');
@@ -57,27 +53,40 @@ export async function POST(nextRequest: NextRequest) {
           .on('data', (data: CsvData) => results.push(data))
           .on('end', async () => {
             const listItems = getListItems(results);
-            await prisma.item.createMany({
-              data: listItems,
-            });
+            try{
+              await prisma.item.createMany({
+                data: listItems,
+              });
+            }catch (error: any) {
+              return Response.json({
+                success: false,
+                error: "Error createMany items",
+              }, { status: 500 });
+          }finally{
+            await del(url);
+          }
           });
         stream.on('finish', resolver);
       });
     });
 
-    listBlobResult = await list();
-    await Promise.all(listBlobResult.blobs.map(async (blob) => {
+    const listBlobResult = await list();
+    try{
+      await Promise.all(listBlobResult.blobs.map(async (blob) => {
         await downloadFile(blob.url);
-    }));
+      }));
+    }catch(error: any){
+      return Response.json({
+        success: false,
+        error: "Error downloading file",
+      }, { status: 500 });
+    }
 
     return Response.json({ success: true }, { status: 200 });
   } catch (error: any) {
     return Response.json({
       success: false,
-      error: error.message,
+      error: "Error upload file",
     }, { status: 500 });
-  }finally{
-    const listBlobToDelete = listBlobResult.blobs.map((blob) => blob.url)
-    await del(listBlobToDelete);
   }
 }
