@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import {
   Table, Button, TableColumnsType, Popconfirm, notification,
   Tag,
+  Empty,
 } from 'antd';
 import { QuestionCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import { ItemService } from '@/services/itemService';
@@ -187,6 +188,14 @@ const ListItems: React.FC<ListItemsProps> = ({ items }) => {
           rowKey={(record) => record.id}
           columns={columns}
           dataSource={listItems}
+          locale={{
+            emptyText: (
+              <>
+                <Empty description={false} />
+                Nenhum Item encontrado
+              </>
+            )
+          }}
           caption={lodding ? (
             <Tag color="processing">
               <LoadingOutlined />
