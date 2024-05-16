@@ -1,8 +1,10 @@
 import csv from 'csv-parser';
-import prisma from '../../lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
-import { put, list, del } from "@vercel/blob";
+import { put, list, del } from '@vercel/blob';
 import axios from 'axios';
+import { Item } from '@/app/components/ListItems';
+import prisma from '../../lib/prisma';
+
 interface CsvData {
   code: string;
   description: string;
@@ -11,49 +13,53 @@ interface CsvData {
   total_price: string;
 }
 
+type ListItems = Omit<Item, 'id'>;
+
+function getListItems(results: CsvData[]) {
+  const listItems:ListItems[] = results.map((result) => ({
+    code: result.code,
+    description: result.description,
+    quantity: Number(result.quantity),
+    price: Number(result.price),
+    total_price: Number(result.total_price),
+    updated_at: new Date(),
+    created_at: new Date(),
+  }));
+
+  return listItems;
+}
+
 export async function POST(nextRequest: NextRequest) {
   try {
-    const formData = await nextRequest.formData()
-    const file = formData.get("file");
+    const formData = await nextRequest.formData();
+    const file = formData.get('file');
 
     if (!file) {
       return NextResponse.json(
-        { error: "File blob is required." },
-        { status: 400 }
+        { error: 'File blob is required.' },
+        { status: 400 },
       );
     }
 
     await put('uploads/data.csv', file, { access: 'public' });
 
-    const downloadFile = (url: string) => {
-      return new Promise((resolver) => {
-        const results: CsvData[] = [];
-        axios({
-          url,
-          responseType: 'stream'
-        }).then((response: any) => {
-          const stream = response.data.pipe(csv())
-            .on('data', (data: CsvData) => results.push(data))
-            .on('end', async () => {
-              for (const result of results) {
-                await prisma.item.create({
-                  data: {
-                    code: result.code,
-                    description: result.description,
-                    quantity: Number(result.quantity),
-                    price: Number(result.price),
-                    total_price: Number(result.total_price),
-                    updated_at: new Date(),
-                    created_at: new Date(),
-                  }
-                });
-              }
+    const downloadFile = (url: string) => new Promise((resolver) => {
+      const results: CsvData[] = [];
+      axios({
+        url,
+        responseType: 'stream',
+      }).then((response: any) => {
+        const stream = response.data.pipe(csv())
+          .on('data', (data: CsvData) => results.push(data))
+          .on('end', async () => {
+            const listItems = getListItems(results);
+            await prisma.item.createMany({
+              data: listItems,
             });
-          stream.on('finish', resolver);
-        });
+          });
+        stream.on('finish', resolver);
       });
-    };
-
+    });
 
     const response = await list();
     await Promise.all(response.blobs.map(async (blob) => {
@@ -61,8 +67,7 @@ export async function POST(nextRequest: NextRequest) {
       await del(blob.url);
     }));
 
-    return Response.json({  success: true })
-
+    return Response.json({ success: true }, { status: 200 });
   } catch (error: any) {
     return Response.json({
       success: false,
