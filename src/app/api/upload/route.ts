@@ -62,12 +62,19 @@ export async function POST(nextRequest: NextRequest) {
     });
 
     const response = await list();
-    await Promise.all(response.blobs.map(async (blob) => {
-      await downloadFile(blob.url);
-    }));
-
-    const listBlobToDelete = response.blobs.map((blob) => blob.url)
-    await del(listBlobToDelete);
+    try{
+      await Promise.all(response.blobs.map(async (blob) => {
+        await downloadFile(blob.url);
+      }));
+    }catch(error: any){
+      return Response.json({
+        success: false,
+        error: error.message,
+      }, { status: 500 });
+    }finally{
+      const listBlobToDelete = response.blobs.map((blob) => blob.url)
+      await del(listBlobToDelete);
+    }
 
     return Response.json({ success: true }, { status: 200 });
   } catch (error: any) {
