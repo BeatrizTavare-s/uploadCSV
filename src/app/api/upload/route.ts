@@ -1,6 +1,6 @@
 import csv from 'csv-parser';
 import { NextRequest, NextResponse } from 'next/server';
-import { put, list, del } from '@vercel/blob';
+import { put, list, del, ListBlobResult } from '@vercel/blob';
 import axios from 'axios';
 import { Item } from '@/app/components/ListItems';
 import prisma from '../../lib/prisma';
@@ -27,6 +27,11 @@ function getListItems(results: CsvData[]) {
   }));
 
   return listItems;
+}
+
+async function deleteListBlobs(listBlobResult: ListBlobResult){
+  const listBlobToDelete = listBlobResult.blobs.map((blob) => blob.url)
+  await del(listBlobToDelete);
 }
 
 export async function POST(nextRequest: NextRequest) {
@@ -62,8 +67,6 @@ export async function POST(nextRequest: NextRequest) {
                 success: false,
                 error: "Error createMany items",
               }, { status: 500 });
-            }finally{
-              await del(url);
             }
           });
         stream.on('finish', resolver);
@@ -81,6 +84,8 @@ export async function POST(nextRequest: NextRequest) {
         error: "Error downloading file",
       }, { status: 500 });
     }
+
+   await deleteListBlobs(listBlobResult)
 
     return Response.json({ success: true }, { status: 200 });
   } catch (error: any) {
